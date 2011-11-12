@@ -1,0 +1,8 @@
+.classpath
+.project
+.settings
+*/target
+/target
+mem.*.db
+.DS_Store
+.scala_dependencies
