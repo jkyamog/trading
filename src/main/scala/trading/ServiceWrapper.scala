@@ -7,7 +7,10 @@ package trading
  * a sample.  Its possible to pass of have an implicity for the asNone
  * function
  */
-class ServiceWrapper[T] (body: () => T, handleException: (java.lang.Throwable) => Unit, asNone: (T) => Boolean) {
+class ServiceWrapper[T] (
+		body: () => T, 
+		handleException: (java.lang.Throwable) => Unit, 
+		asNone: (T) => Boolean) {
 	
 	def execute: Option[T] = {
 		val result = body()
@@ -37,13 +40,11 @@ class ServiceWrapper[T] (body: () => T, handleException: (java.lang.Throwable) =
 }
 
 object ServiceWrapper {
-	implicit def nullAsNone[T] = (value: T) => if (value == null) true else false
-	implicit def printException = (exception: java.lang.Throwable) => println(exception.getMessage)
-
 	def apply[T](body: () => T)(implicit handleException: (java.lang.Throwable) => Unit, asNone: (T) => Boolean) = {
-	
 		new ServiceWrapper(body, handleException, asNone)
 	}
 
+	implicit def nullAsNone[T] = (value: T) => if (value == null) true else false
+	implicit def printException = (exception: java.lang.Throwable) => println(exception.getMessage)
 }
 

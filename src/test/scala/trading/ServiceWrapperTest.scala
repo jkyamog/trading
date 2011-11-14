@@ -9,7 +9,6 @@ class ServiceWrapperTest {
 	@Test
 	def testWithWorkingService {
 		implicit val emptyTrade = (trades: Seq[Trade]) => if (trades.size == 0) true else false
-		
 		import ServiceWrapper.printException
 		
 		val tradeService = ServiceWrapper[Seq[Trade]] (() => { 
