@@ -3,7 +3,6 @@ package trading
 import org.junit.Test
 import org.junit.Assert._
 import scala.collection.JavaConversions._
-import java.io.IOException
 
 class ServiceWrapperTest {
 	
@@ -65,7 +64,7 @@ class ServiceWrapperTest {
 	@Test
 	def testWithExceptionService {
 		val exceptionService = new TradeService() {
-			def getTrades = throw new IOException("service that always throw exception")
+			def getTrades = throw new Exception("service that always throw exception")
 		}
 
 		implicit val emptyTrade = (trades: Seq[Trade]) => if (trades.size == 0) true else false
@@ -96,11 +95,42 @@ class ServiceWrapperTest {
 	@Test
 	def testExceptionMessage {
 		val exceptionService = new TradeService() {
-			def getTrades = throw new IOException("service that always throw exception")
+			def getTrades = throw new Exception("service that always throw exception")
 		}
+		
+		def brokenRecoveryMethod = throw new Exception("unable to recover")
 
 		implicit val emptyTrade = (trades: Seq[Trade]) => if (trades.size == 0) true else false
 		import ServiceWrapper.printException
+		
+		val msg = try {
+			exceptionService.getTrades
+		} catch {
+			case e => try {
+				brokenRecoveryMethod
+				"recovered from " + e.getMessage
+			} catch {
+				case e => e.getMessage
+			}
+		} 
+		
+		assertEquals("unable to recover", msg)
+		
+		def fixedRecoveryMethod = "recovered"
+		
+		val msg2 = try {
+			exceptionService.getTrades
+		} catch {
+			case e => try {
+				fixedRecoveryMethod
+				"recovered from " + e.getMessage
+			} catch {
+				case e => e.getMessage
+			}
+		} 
+		
+		assertEquals("recovered from service that always throw exception", msg2)
+
 		
 	}
 }
