@@ -88,49 +88,32 @@ class ServiceWrapperTest {
 		
 		tradeService.executeWithHandle match {
 			case Some(trades) => fail("expected to get none")
-			case None => assertTrue(true)
+			case None => assertTrue(true)					
 		}
 	}
-	
+
 	@Test
-	def testExceptionMessage {
+	def testFailingService {
 		val exceptionService = new TradeService() {
 			def getTrades = throw new Exception("service that always throw exception")
 		}
 		
-		def brokenRecoveryMethod = throw new Exception("unable to recover")
-
 		implicit val emptyTrade = (trades: Seq[Trade]) => if (trades.size == 0) true else false
 		import ServiceWrapper.printException
 		
-		val msg = try {
+		val tradeService = ServiceWrapper[Seq[Trade]] (() => { 
 			exceptionService.getTrades
-		} catch {
-			case e => try {
-				brokenRecoveryMethod
-				"recovered from " + e.getMessage
-			} catch {
-				case e => e.getMessage
-			}
-		} 
-		
-		assertEquals("unable to recover", msg)
-		
-		def fixedRecoveryMethod = "recovered"
-		
-		val msg2 = try {
-			exceptionService.getTrades
-		} catch {
-			case e => try {
-				fixedRecoveryMethod
-				"recovered from " + e.getMessage
-			} catch {
-				case e => e.getMessage
-			}
-		} 
-		
-		assertEquals("recovered from service that always throw exception", msg2)
+		})
 
+		val (msg, gotTrades, trades) = tradeService.executeWithTry match {
+			case Right(Some(trades)) => ("", true, trades)
+			case Right(None) => ("", false, Nil)
+			case Left(exception) => (exception.getMessage, false, Nil)
+		}
 		
+		assertEquals("service that always throw exception", msg)
+		assertFalse(gotTrades)
+		assertEquals(0, trades.size);
+
 	}
 }
