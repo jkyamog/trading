@@ -1,11 +1,11 @@
 package trading
 
-class OrderService {
+object OrderServiceS {
 	def processOrder(
 			doneVolume: BigDecimal, 
 			targetVolume: BigDecimal, 
 			totalDoneVolume: BigDecimal, 
-			order: Order) {
+			order: OrderS) = {
 
 		def reduceToEntireOrder = if (targetVolume - doneVolume > order.volume - totalDoneVolume)
 				order.volume - totalDoneVolume
@@ -23,9 +23,10 @@ class OrderService {
 			case None => reduceToEntireOrder
 		}					
 		
-		if (volumeToTrade > 0) {
-			// do some order here
-		}
+		if (volumeToTrade > 0)
+			Some(volumeToTrade)
+		else
+			None
 		
 	}
 
