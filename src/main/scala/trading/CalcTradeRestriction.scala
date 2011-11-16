@@ -2,14 +2,14 @@ package trading
 import scala.annotation.tailrec
 
 object CalcTradeRestriction {
-	val marketVolume = 700
-	val volumeDone = 100
+	val marketVolume = 70000
+	val volumeDone = 10000
 	val pctAllowed = 25
 	
 	val volumeToTrade = marketVolume * pctAllowed / 100 - volumeDone: BigDecimal
 	
 	var volumesCalculated: Stream[BigDecimal] = _
-	var maxPower = 5
+	var maxPower = 500
 	
 	def calcByRecursion(marketVolume: BigDecimal, volumeDone: BigDecimal, pctAllowed: Double): BigDecimal = {
 		def calc(volumeToTrade: BigDecimal, power: Int): BigDecimal =
