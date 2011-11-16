@@ -9,7 +9,7 @@ object CalcTradeRestriction {
 	val volumeToTrade = marketVolume * pctAllowed / 100 - volumeDone: BigDecimal
 	
 	var volumesCalculated: Stream[BigDecimal] = _
-	var maxPower = 500
+	var maxPower = 5
 	
 	def calcByRecursion(marketVolume: BigDecimal, volumeDone: BigDecimal, pctAllowed: Double): BigDecimal = {
 		def calc(volumeToTrade: BigDecimal, power: Int): BigDecimal =
@@ -65,8 +65,6 @@ object CalcTradeRestriction {
 		byIterationJava()
 		byFold()
 		byStream()
-		
-		maxPower = 5
 		
 		def byStream2 = () => (volumesCalculated take (maxPower+1) sum).setScale(0, BigDecimal.RoundingMode.FLOOR)
 
