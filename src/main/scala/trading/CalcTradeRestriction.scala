@@ -2,14 +2,15 @@ package trading
 import scala.annotation.tailrec
 
 object CalcTradeRestriction {
-	val marketVolume = 70000
-	val volumeDone = 10000
+	val marketVolume = 700
+	val volumeDone = 100
 	val pctAllowed = 25
+	val scaleBy = 5
+	var maxPower = 5
 	
 	val volumeToTrade = marketVolume * pctAllowed / 100 - volumeDone: BigDecimal
 	
 	var volumesCalculated: Stream[BigDecimal] = _
-	var maxPower = 5
 	
 	def calcByRecursion(marketVolume: BigDecimal, volumeDone: BigDecimal, pctAllowed: Double): BigDecimal = {
 		def calc(volumeToTrade: BigDecimal, power: Int): BigDecimal =
@@ -18,7 +19,7 @@ object CalcTradeRestriction {
 			else
 				volumeToTrade * Math.pow(pctAllowed/100, power) + calc(volumeToTrade, power + 1)
 		
-		return (volumeToTrade + calc(volumeToTrade, 1)).setScale(0, BigDecimal.RoundingMode.FLOOR) + volumeDone
+		return (volumeToTrade + calc(volumeToTrade, 1)).setScale(scaleBy, BigDecimal.RoundingMode.FLOOR) + volumeDone
 		
 	}
 	
@@ -27,7 +28,7 @@ object CalcTradeRestriction {
 		for ( i <- 1 to maxPower ) {
 			increaseInRestrictionFromOurTrade += volumeToTrade * Math.pow(pctAllowed/100, i)
 		}
-		return (volumeToTrade + increaseInRestrictionFromOurTrade).setScale(0, BigDecimal.RoundingMode.FLOOR) + volumeDone
+		return (volumeToTrade + increaseInRestrictionFromOurTrade).setScale(scaleBy, BigDecimal.RoundingMode.FLOOR) + volumeDone
 	}
 	
 	def calcByFold(marketVolume: BigDecimal, volumeDone: BigDecimal, pctAllowed: Double) = {
@@ -36,7 +37,7 @@ object CalcTradeRestriction {
 			increaseInRestrictionFromOurTrade + calcVol(power) * volumeToTrade
 		}
 		
-		newVolume.setScale(0, BigDecimal.RoundingMode.FLOOR) + volumeDone
+		newVolume.setScale(scaleBy, BigDecimal.RoundingMode.FLOOR) + volumeDone
 	}
 	
 	def calcByStream(marketVolume: BigDecimal, volumeDone: BigDecimal, pctAllowed: Double) = {
@@ -49,7 +50,7 @@ object CalcTradeRestriction {
 		
 		volumesCalculated = calcIncrease(volumeToTrade + volumeDone, 1)
 		
-		(volumesCalculated take (maxPower+1) sum).setScale(0, BigDecimal.RoundingMode.FLOOR)
+		(volumesCalculated take (maxPower+1) sum).setScale(scaleBy, BigDecimal.RoundingMode.FLOOR)
 	}
 	
 	def main(args: Array[String]) {
@@ -66,7 +67,7 @@ object CalcTradeRestriction {
 		byFold()
 		byStream()
 		
-		def byStream2 = () => (volumesCalculated take (maxPower+1) sum).setScale(0, BigDecimal.RoundingMode.FLOOR)
+		def byStream2 = () => (volumesCalculated take (maxPower+1) sum).setScale(scaleBy, BigDecimal.RoundingMode.FLOOR)
 
 		print("recursion: "); timeAndPrint(byRecursion)
 		print("iteration: "); timeAndPrint(byIteration)

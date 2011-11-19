@@ -11,6 +11,6 @@ public class CalcTrade {
 		for (int i = 0; i <= CalcTradeRestriction.maxPower(); i++ ) {
 			increaseInRestrictionFromOurTrade = increaseInRestrictionFromOurTrade.add(volumeToTrade.multiply(new BigDecimal(Math.pow(pctAllowed/100, i))));
 		}
-		return (increaseInRestrictionFromOurTrade).setScale(0, BigDecimal.ROUND_FLOOR).add(volumeDone);
+		return (increaseInRestrictionFromOurTrade).setScale(CalcTradeRestriction.scaleBy(), BigDecimal.ROUND_FLOOR).add(volumeDone);
 	}
 }
